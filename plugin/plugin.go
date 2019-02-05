@@ -60,7 +60,7 @@ import (
 	descriptor "github.com/gogo/protobuf/protoc-gen-gogo/descriptor"
 	"github.com/gogo/protobuf/protoc-gen-gogo/generator"
 	"github.com/gogo/protobuf/vanity"
-	"github.com/mwitkow/go-proto-validators"
+	"github.com/utilitywarehouse/go-proto-validators"
 )
 
 type plugin struct {
@@ -92,7 +92,7 @@ func (p *plugin) Generate(file *generator.FileDescriptor) {
 	p.PluginImports = generator.NewPluginImports(p.Generator)
 	p.regexPkg = p.NewImport("regexp")
 	p.fmtPkg = p.NewImport("fmt")
-	p.validatorPkg = p.NewImport("github.com/mwitkow/go-proto-validators")
+	p.validatorPkg = p.NewImport("github.com/utilitywarehouse/go-proto-validators")
 
 	for _, msg := range file.Messages() {
 		if msg.DescriptorProto.GetOptions().GetMapEntry() {
@@ -579,7 +579,7 @@ func (p *plugin) validatorWithNonRepeatedConstraint(fv *validator.FieldValidator
 	// Need to use reflection in order to be future-proof for new types of constraints.
 	v := reflect.ValueOf(*fv)
 	for i := 0; i < v.NumField(); i++ {
-		if v.Type().Field(i).Name != "RepeatedCountMin" && v.Type().Field(i).Name != "RepeatedCountMax" && v.Field(i).Pointer() != 0 {
+		if !strings.HasPrefix(v.Type().Field(i).Name, "XXX") && v.Type().Field(i).Name != "RepeatedCountMin" && v.Type().Field(i).Name != "RepeatedCountMax" && !v.Field(i).IsNil() {
 			return true
 		}
 	}
